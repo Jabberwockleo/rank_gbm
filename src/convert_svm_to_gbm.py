@@ -16,8 +16,14 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-if __name__ == "__main__":
-    svm_fn = sys.argv[1]
+def convert(svm_fn):
+    """Convert svmlight formart to LightGBM formart
+
+    For ranking task
+
+    Args:
+        svm_fn: file name for svm light file
+    """
     gbm_feature_fn = svm_fn + ".gbm_data"
     gbm_qd_count_fn = gbm_feature_fn + ".query"
 
@@ -45,3 +51,8 @@ if __name__ == "__main__":
             last_qid = qid
             accumulate_query_count = 1
     gbm_qd_count_fo.write("%d\n" % (accumulate_query_count))
+
+
+if __name__ == "__main__":
+    svm_fn = sys.argv[1]
+    convert(svm_fn)
