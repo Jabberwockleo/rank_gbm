@@ -88,7 +88,7 @@ def labels_for_nonlinear_samples(qd_vec):
         if np.array_equal(qd, sorted_qd_vec[0]):
             label_vec.append(1)
         else:
-            label_vec.append(-1)
+            label_vec.append(0)
     pass
     return label_vec
 
