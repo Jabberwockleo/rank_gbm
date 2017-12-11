@@ -16,6 +16,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+
 def convert(svm_fn):
     """Convert svmlight formart to LightGBM formart
 
@@ -51,6 +52,9 @@ def convert(svm_fn):
             last_qid = qid
             accumulate_query_count = 1
     gbm_qd_count_fo.write("%d\n" % (accumulate_query_count))
+    svm_fi.close()
+    gbm_feature_fo.close()
+    gbm_qd_count_fo.close()
 
 
 if __name__ == "__main__":

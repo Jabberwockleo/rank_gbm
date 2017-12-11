@@ -212,10 +212,10 @@ if __name__ == "__main__":
     if config.USE_TOY_DATA == True:
         fin = open(config.TRAIN_DATA, "w")
         generate_labeled_data_file(fin, 1000)
-        svm2gbm.convert(config.TRAIN_DATA)
         fin.close()
+        svm2gbm.convert(config.TRAIN_DATA)
         fin = open(config.TEST_DATA, "w")
         generate_labeled_data_file(fin, 100)
-        svm2gbm.convert(config.TEST_DATA)
         fin.close()
+        svm2gbm.convert(config.TEST_DATA)
     print "=== DONE ==="
