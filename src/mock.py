@@ -92,6 +92,90 @@ def labels_for_nonlinear_samples(qd_vec):
     pass
     return label_vec
 
+def generate_boundary_data(fname='boundary.gbm_data'):
+    fnd = open(fname, "w")
+    fnq = open(fname + ".query", "w")
+    rg = np.arange(0, 11) / 10
+    # same qs
+    if True:
+        for q in rg:
+            for i in range(len(rg)):
+                for j in range(i + 1, len(rg)):
+                    fnd.write("0 1:{} 2:{}\n".format(q, rg[i]))
+                    fnd.write("1 1:{} 2:{}\n".format(q, rg[j]))
+                    fnq.write("2\n")
+                
+    # qs dominant 1
+    if True:
+        for q in rg[:-1]:
+            for i in range(len(rg)):
+                for j in range(i + 1, len(rg)):
+                    fnd.write("0 1:{} 2:{}\n".format(q, rg[i]))
+                    fnd.write("1 1:{} 2:{}\n".format(1.0, rg[j]))
+                    fnq.write("2\n")
+                    fnd.write("0 1:{} 2:{}\n".format(q, rg[j]))
+                    fnd.write("1 1:{} 2:{}\n".format(1.0, rg[i]))
+                    fnq.write("2\n")
+    # qs trivial 0
+    if True:
+        for q in rg[1:]:
+            for i in range(len(rg)):
+                for j in range(i + 1, len(rg)):
+                    fnd.write("1 1:{} 2:{}\n".format(q, rg[i]))
+                    fnd.write("0 1:{} 2:{}\n".format(0.0, rg[j]))
+                    fnq.write("2\n")
+                    fnd.write("1 1:{} 2:{}\n".format(q, rg[j]))
+                    fnd.write("0 1:{} 2:{}\n".format(0.0, rg[i]))
+                    fnq.write("2\n")
+                    
+    
+    # minor qs diff, large inverse as diff
+    if True:
+        for low_qs in rg[1:-1]:
+            for high_qs in np.arange(1, 3) / 10 + low_qs:
+                if high_qs >= 1.0:
+                    continue
+                for low_as in rg[:-5]:
+                    for high_as in np.arange(5, 10) / 10 + low_as:
+                        if high_as > 1.0:
+                            continue
+                        fnd.write("0 1:{} 2:{}\n".format(np.around(high_qs, decimals=1), np.around(low_as, decimals=1)))
+                        fnd.write("1 1:{} 2:{}\n".format(np.around(low_qs, decimals=1), np.around(high_as, decimals=1)))
+                        fnq.write("2\n")
+                        
+    # minor qs diff, minor inverse as diff
+    if True:
+        for low_qs in rg[1:-1]:
+            for high_qs in np.arange(1, 3) / 10 + low_qs:
+                if high_qs >= 1.0:
+                    continue
+                for low_as in rg[:-5]:
+                    for high_as in np.arange(1, 5) / 10 + low_as:
+                        if high_as > 1.0:
+                            continue
+                        fnd.write("1 1:{} 2:{}\n".format(np.around(high_qs, decimals=1), np.around(low_as, decimals=1)))
+                        fnd.write("0 1:{} 2:{}\n".format(np.around(low_qs, decimals=1), np.around(high_as, decimals=1)))
+                        fnq.write("2\n")
+
+    # large qs diff, comom case and special case
+    if True:
+        for low_qs in rg[1:-3]:
+            for high_qs in np.arange(3, 10) / 10 + low_qs:
+                if high_qs >= 1.0:
+                    continue
+                for as1 in rg:
+                    for as2 in rg:
+                        if as1 == 0.0 and as2 >= 0.6:
+                            fnd.write("0 1:{} 2:{}\n".format(np.around(high_qs, decimals=1), as1))
+                            fnd.write("1 1:{} 2:{}\n".format(np.around(low_qs, decimals=1), as2))
+                            fnq.write("2\n")   
+                        else:
+                            fnd.write("1 1:{} 2:{}\n".format(np.around(high_qs, decimals=1), as1))
+                            fnd.write("0 1:{} 2:{}\n".format(np.around(low_qs, decimals=1), as2))
+                            fnq.write("2\n")                           
+    fnd.close()
+    fnq.close()
+    return
 
 def generate_labeled_data_file(fout, query_count=100,
     query_doc_count=config.MOCK_QUERY_DOC_COUNT):
@@ -124,6 +208,7 @@ def generate_labeled_data_file(fout, query_count=100,
             f_arr = []
             for j in xrange(query_doc_count):
                 f_vec = np.random.random_sample(config.FEATURE_NUM).round(2)
+                # morph score distribution
                 if f_vec[0] < 0.3:
                     if np.random.random() < 0.5:
                         f_vec[0] = 0
@@ -132,6 +217,7 @@ def generate_labeled_data_file(fout, query_count=100,
                         f_vec[1] = 1.0
                 f_arr.append(f_vec)
 
+            # labeling
             l_arr = labels_for_nonlinear_samples(f_arr)
 
             # FORMAT: label qid:xx 1:x 2:y ..
@@ -218,4 +304,5 @@ if __name__ == "__main__":
         generate_labeled_data_file(fin, 100)
         fin.close()
         svm2gbm.convert(config.TEST_DATA)
+        generate_boundary_data(fname='boundary.gbm_data')
     print "=== DONE ==="
